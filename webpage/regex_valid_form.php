@@ -1,25 +1,96 @@
 <?php
-
-	$pattern="";
-	$text="";
-	$replaceText="";
-	$replacedText="";
-
+	
 	$match="Not checked yet.";
+	$replacedText="No replacement yet";
+	$pattern=$text=$email=$phone="";
 
-if ($_SERVER["REQUEST_METHOD"]=="POST") {
-	$pattern=$_POST["pattern"];
-	$text=$_POST["text"];
-	$replaceText=$_POST["replaceText"];
+	$patternErr=$textErr=$emailErr=$phoneErr=$textAreaErr="";
 
-	$replacedText=preg_replace($pattern, $replaceText, $text);
+	
 
-	if(preg_match($pattern, $text)) {
-						$match="Match!";
-					} else {
-						$match="Does not match!";
-					}
-}
+	if($_SERVER["REQUEST_METHOD"]=="POST")
+	{
+		//pattern
+		if (empty($_POST["pattern"])) 
+		{
+			$patternErr="	*Pattern not set";
+		}
+		else
+		{
+			$pattern=test_input($_POST["pattern"]);
+			if (!preg_match("/[quick]/", $_POST["pattern"])) {
+				$patternErr="pattern doesn't match";
+			}
+		}
+
+		//text
+		if(empty($_POST["text"]))
+		{
+			$textErr="	*Text is required";
+		}
+		else
+		{
+			$text=test_input($_POST["text"]);
+			
+		}
+
+		//text Area
+		if(empty($_POST["textArea"]))
+		{
+			$textAreaErr="*Text is required";
+		}
+		else
+		{
+			$replacedText=test_input($_POST["textArea"]);
+			
+		}
+
+
+		//Email address
+		if (empty($_POST["email"])) 
+		{
+   			$emailErr = "*Email is required";
+  		}
+  		else 
+  		{
+    		$email = test_input($_POST["email"]);
+   			if (!filter_var($email, FILTER_VALIDATE_EMAIL)) 
+   			{
+      			$emailErr = "Invalid email format"; 
+   		 	}
+  		}
+
+		//Phone number
+		if(empty($_POST["phone"]))
+		{
+			$phoneErr="*Phone number is required";
+		}
+		else
+		{
+			$phone=test_input($_POST["phone"]);
+			if(!preg_match("/9989/", $_POST["phone"]))
+			{
+				$phoneErr="Invalid phone format";
+				echo $_POST["phone"];
+			}
+		}
+		if ($patternErr==""&$textErr=="") {
+			$match="Match!";
+		}
+		
+
+
+	}	 
+	 
+	function test_input($data) 
+	{
+  		$data = trim($data);
+		  $data = stripslashes($data);
+		  $data = htmlspecialchars($data);
+		  return $data;
+		
+	}
+
 
 ?>
 
@@ -31,22 +102,40 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
 	<title>Valid Form</title>
 </head>
 <body>
+	<style>
+		.error{
+			color:red;
+		}
+	</style>
 	<form action="regex_valid_form.php" method="post">
 		<dl>
 			<dt>Pattern</dt>
-			<dd><input type="text" name="pattern" value="<?= $pattern ?>"></dd>
+			<dd><input type="text" name="pattern" value="<?= $pattern ?>">
+			<span class="error"><?php echo $patternErr; ?></span></dd>
 
 			<dt>Text</dt>
-			<dd><input type="text" name="text" value="<?= $text ?>"></dd>
+			<dd><input type="text" name="text" value="<?= $text ?>">
+			<span class="error"><?php echo $textErr ?></span></dd>
 
-			<dt>Replace Text</dt>
-			<dd><input type="text" name="replaceText" value="<?= $replaceText ?>"></dd>
+			<dt>Text Area</dt>
+			<dd><textarea name="textArea" value="textArea" rows="5" cols="40"></textarea>
+			<span class="error"><?php echo $textAreaErr; ?></span></dd>
+
+
+			<dt>Email address</dt>
+			<dd><input type="text" name="email" value="<?= $email?>">
+			<span class="error"><?php echo "$emailErr"; ?></span></dd>
+
+			<dt>Phone number</dt>
+			<dd><input type="text" name="phone" value="<?= $phone ?>">
+			<span class="error"><?php echo "$phoneErr"; ?></span></dd>
 
 			<dt>Output Text</dt>
 			<dd><?=	$match ?></dd>
 
+
 			<dt>Replaced Text</dt>
-			<dd> <code><?=	$replacedText ?></code></dd>
+			<dd><?=	$replacedText ?></dd>
 
 			<dt>&nbsp;</dt>
 			<dd><input type="submit" value="Check"></dd>
